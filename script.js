@@ -1,4 +1,3 @@
-
 /* =================================
    DATA ANTREAN
 ================================= */
@@ -32,8 +31,12 @@ Object.keys(layananList).forEach(key => {
     }
 });
 
-// Mengambil antrean aktif setelah halaman di-refresh
+// Memulihkan antrean yang sedang dipanggil
 let aktif = antrean.find(a => a.status === "Dipanggil") || null;
+
+// Pengaturan halaman tabel
+let halamanSekarang = 1;
+const dataPerHalaman = 10;
 
 
 /* =================================
@@ -65,13 +68,11 @@ function ambilAntrean() {
         return;
     }
 
-    // Tambah nomor antrean berdasarkan layanan
     counter[layanan]++;
 
     const nomor = layanan + "-" +
         String(counter[layanan]).padStart(3, "0");
 
-    // Membuat data antrean
     const data = {
         nomor: nomor,
         nama: nama,
@@ -82,16 +83,16 @@ function ambilAntrean() {
 
     antrean.push(data);
 
+    halamanSekarang = 1;
+
     simpanData();
     tampilkanAntrean();
 
-    // Menampilkan nomor antrean kepada pengunjung
     document.getElementById("hasil").innerHTML =
-        "Nomor antrean Anda: " +
+        "Nomor antrean Anda:" +
         "<h2>" + escapeHTML(nomor) + "</h2>" +
         "Layanan: " + escapeHTML(layananList[layanan]);
 
-    // Mengosongkan formulir
     document.getElementById("nama").value = "";
     document.getElementById("layanan").value = "";
 }
@@ -105,39 +106,100 @@ function tampilkanAntrean() {
 
     const tabel = document.getElementById("daftarAntrean");
 
-    tabel.innerHTML = "";
-
-    // Menampilkan antrean yang masih menunggu
-    const daftarMenunggu = antrean
-        .filter(a => a.status === "Menunggu")
+    // Menampilkan seluruh riwayat antrean
+    // Termasuk Menunggu, Dipanggil, Selesai, dan Dilewati
+    const daftarTampil = antrean
+        .filter(a =>
+            a.status === "Menunggu" ||
+            a.status === "Dipanggil" ||
+            a.status === "Selesai" ||
+            a.status === "Dilewati"
+        )
         .sort((a, b) => a.waktu - b.waktu);
 
-    if (daftarMenunggu.length === 0) {
+    const totalHalaman = Math.max(
+        1,
+        Math.ceil(daftarTampil.length / dataPerHalaman)
+    );
+
+    // Memastikan halaman tetap dalam batas
+    halamanSekarang = Math.max(
+        1,
+        Math.min(halamanSekarang, totalHalaman)
+    );
+
+    const awal = (halamanSekarang - 1) * dataPerHalaman;
+
+    const dataHalaman = daftarTampil.slice(
+        awal,
+        awal + dataPerHalaman
+    );
+
+    tabel.innerHTML = "";
+
+    if (dataHalaman.length === 0) {
+
         tabel.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align:center;">
-                    Belum ada antrean menunggu.
+                <td colspan="6" style="text-align:center;">
+                    Belum ada antrean.
                 </td>
             </tr>
         `;
+
     } else {
 
-        daftarMenunggu.forEach((a, index) => {
+        dataHalaman.forEach((a, index) => {
+
+            // Tombol muncul untuk antrean Dipanggil maupun Dilewati
+            const tombolPanggil =
+                (a.status === "Dipanggil" || a.status === "Dilewati")
+                    ? `<button class="btn-warning btn-repeat"
+                         onclick="panggilUlang('${escapeHTML(a.nomor)}')">
+                         <i class="bi bi-volume-up-fill"></i>
+                         Panggil Ulang
+                       </button>`
+                    : "-";
 
             tabel.innerHTML += `
                 <tr>
-                    <td>${index + 1}</td>
-                    <td>${escapeHTML(a.nomor)}</td>
+                    <td>${awal + index + 1}</td>
+
+                    <td>
+                        <strong>${escapeHTML(a.nomor)}</strong>
+                    </td>
+
                     <td>${escapeHTML(a.nama)}</td>
-                    <td>${escapeHTML(layananList[a.layanan] || a.layanan)}</td>
-                    <td>${escapeHTML(a.status)}</td>
+
+                    <td>
+                        ${escapeHTML(
+                            layananList[a.layanan] || a.layanan
+                        )}
+                    </td>
+
+                    <td>
+                        <span class="status-${a.status.toLowerCase()}">
+                            ${escapeHTML(a.status)}
+                        </span>
+                    </td>
+
+                    <td>${tombolPanggil}</td>
                 </tr>
             `;
-
         });
     }
 
-    // Menampilkan nomor antrean aktif
+    // Informasi halaman
+    document.getElementById("infoHalaman").textContent =
+        `Halaman ${halamanSekarang} dari ${totalHalaman}`;
+
+    document.getElementById("btnSebelumnya").disabled =
+        halamanSekarang === 1;
+
+    document.getElementById("btnBerikutnya").disabled =
+        halamanSekarang === totalHalaman;
+
+    // Tampilan pemanggilan utama
     document.getElementById("nomorAktif").textContent =
         aktif ? aktif.nomor : "-";
 
@@ -147,8 +209,19 @@ function tampilkanAntrean() {
     document.getElementById("layananAktif").textContent =
         aktif ? layananList[aktif.layanan] : "";
 
-    // Memperbarui daftar nomor setiap layanan
     tampilkanNomorLayanan();
+}
+
+
+/* =================================
+   PINDAH HALAMAN TABEL
+================================= */
+
+function ubahHalaman(arah) {
+
+    halamanSekarang += arah;
+
+    tampilkanAntrean();
 }
 
 
@@ -173,11 +246,8 @@ function tampilkanNomorLayanan() {
         const elemen = document.getElementById(kategori[key]);
 
         if (elemen) {
-
-            const nomor = key + "-" +
+            elemen.textContent = key + "-" +
                 String(counter[key]).padStart(3, "0");
-
-            elemen.textContent = nomor;
         }
 
     });
@@ -205,9 +275,9 @@ function escapeHTML(value) {
    SUARA PEMANGGILAN
 ================================= */
 
-function suaraAntrean() {
+function suaraAntrean(data) {
 
-    if (!aktif) return;
+    if (!data) return;
 
     if (!("speechSynthesis" in window)) {
         alert("Fitur suara tidak didukung browser ini.");
@@ -218,11 +288,11 @@ function suaraAntrean() {
 
     const pesan = new SpeechSynthesisUtterance(
         "Nomor antrean " +
-        aktif.nomor +
+        data.nomor +
         ", atas nama " +
-        aktif.nama +
+        data.nama +
         ", untuk layanan " +
-        layananList[aktif.layanan] +
+        layananList[data.layanan] +
         ", silakan menuju petugas."
     );
 
@@ -245,7 +315,7 @@ function panggilBerikutnya() {
         return;
     }
 
-    // Mengambil antrean paling awal dari seluruh layanan
+    // Mengambil antrean Menunggu paling awal
     const berikutnya = antrean
         .filter(a => a.status === "Menunggu")
         .sort((a, b) => a.waktu - b.waktu)[0];
@@ -256,29 +326,50 @@ function panggilBerikutnya() {
     }
 
     berikutnya.status = "Dipanggil";
-
     aktif = berikutnya;
 
     simpanData();
     tampilkanAntrean();
 
-    // Memanggil nomor menggunakan suara
-    suaraAntrean();
+    suaraAntrean(aktif);
 }
 
 
 /* =================================
    PANGGIL ULANG
+   Bisa dari tabel dan dashboard
 ================================= */
 
-function panggilUlang() {
+function panggilUlang(nomor = aktif ? aktif.nomor : null) {
 
-    if (!aktif) {
-        alert("Belum ada antrean yang dipanggil.");
+    if (!nomor) {
+        alert("Pilih antrean yang ingin dipanggil ulang.");
         return;
     }
 
-    suaraAntrean();
+    const data = antrean.find(a =>
+        a.nomor === nomor &&
+        (a.status === "Dipanggil" || a.status === "Dilewati")
+    );
+
+    if (!data) {
+        alert("Antrean tidak ditemukan atau tidak dapat dipanggil ulang.");
+        return;
+    }
+
+    // Ubah kembali status menjadi Dipanggil
+    data.status = "Dipanggil";
+
+    // Jadikan antrean tersebut sebagai antrean aktif
+    aktif = data;
+
+    simpanData();
+
+    // Memperbarui tabel dan layar pemanggilan utama
+    tampilkanAntrean();
+
+    // Panggil suara antrean
+    suaraAntrean(data);
 }
 
 
@@ -293,8 +384,10 @@ function selesaikan() {
         return;
     }
 
+    // Mengubah status tanpa menghapus data
     aktif.status = "Selesai";
 
+    // Mengosongkan antrean aktif
     aktif = null;
 
     simpanData();
@@ -313,6 +406,7 @@ function lewati() {
         return;
     }
 
+    // Mengubah status tanpa menghapus data
     aktif.status = "Dilewati";
 
     aktif = null;
@@ -333,21 +427,16 @@ function resetAntrean() {
         "Seluruh data antrean dan nomor layanan akan dihapus."
     );
 
-    if (!konfirmasi) {
-        return;
-    }
+    if (!konfirmasi) return;
 
-    // Menghapus seluruh data antrean
     antrean = [];
-
     aktif = null;
+    halamanSekarang = 1;
 
-    // Mengembalikan semua nomor ke nol
     Object.keys(counter).forEach(key => {
         counter[key] = 0;
     });
 
-    // Menghentikan suara jika sedang berjalan
     if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
     }
