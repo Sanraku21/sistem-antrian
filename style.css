@@ -128,6 +128,7 @@ body {
     font-size: 25px;
     font-weight: 700;
     margin-top: 8px;
+    overflow-wrap: anywhere;
 }
 
 #layananAktif {
@@ -291,9 +292,15 @@ button {
     transition: 0.2s;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     opacity: 0.88;
     transform: translateY(-1px);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .btn-primary {
@@ -335,6 +342,11 @@ button:hover {
     text-align: center;
     font-weight: 700;
     font-size: 15px;
+}
+
+#hasil h2 {
+    font-size: 28px;
+    margin: 5px 0;
 }
 
 
@@ -395,6 +407,88 @@ tbody tr:nth-child(even) {
 
 tbody tr:hover {
     background: #edf4fb;
+}
+
+
+/* ==============================
+   STATUS ANTREAN
+============================== */
+
+.status-menunggu,
+.status-dipanggil,
+.status-selesai,
+.status-dilewati {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-menunggu {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-dipanggil {
+    background: #d1e7dd;
+    color: #146c43;
+}
+
+.status-selesai {
+    background: #d1e7dd;
+    color: #146c43;
+}
+
+.status-dilewati {
+    background: #f8d7da;
+    color: #842029;
+}
+
+
+/* ==============================
+   TOMBOL PANGGIL ULANG DI TABEL
+============================== */
+
+.btn-repeat {
+    background: #e9a23b;
+    color: white;
+    padding: 8px 12px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+
+/* ==============================
+   PAGINATION TABEL
+============================== */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.pagination button {
+    background: #2476b9;
+    padding: 10px 15px;
+    margin: 0;
+}
+
+.pagination button:disabled {
+    background: #bfc5cc;
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#infoHalaman {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
 }
 
 
@@ -490,4 +584,42 @@ tbody tr:hover {
         font-size: 11px;
     }
 
+    .pagination {
+        gap: 8px;
+    }
+
+    .pagination button {
+        padding: 9px 10px;
+        font-size: 11px;
+    }
+
+    th,
+    td {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+}
+
+/* Memperbesar nama pengunjung di layar pemanggilan */
+/* Nama pengunjung */
+#namaAktif {
+    font-size: 72px;
+    font-weight: 800;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+/* Ikon orang */
+.calling-display .bi-person-fill {
+    font-size: 55px;
+}
+
+/* Jenis layanan */
+#layananAktif {
+    font-size: 36px;
+    font-weight: 800;
+    margin-top: 20px;
+    line-height: 1.3;
 }
