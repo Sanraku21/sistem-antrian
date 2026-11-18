@@ -1,3 +1,4 @@
+
 /* =================================
    DATA ANTREAN
 ================================= */
@@ -107,7 +108,6 @@ function tampilkanAntrean() {
     const tabel = document.getElementById("daftarAntrean");
 
     // Menampilkan seluruh riwayat antrean
-    // Termasuk Menunggu, Dipanggil, Selesai, dan Dilewati
     const daftarTampil = antrean
         .filter(a =>
             a.status === "Menunggu" ||
@@ -151,15 +151,29 @@ function tampilkanAntrean() {
 
         dataHalaman.forEach((a, index) => {
 
-            // Tombol muncul untuk antrean Dipanggil maupun Dilewati
-            const tombolPanggil =
-                (a.status === "Dipanggil" || a.status === "Dilewati")
-                    ? `<button class="btn-warning btn-repeat"
-                         onclick="panggilUlang('${escapeHTML(a.nomor)}')">
-                         <i class="bi bi-volume-up-fill"></i>
-                         Panggil Ulang
-                       </button>`
-                    : "-";
+            // Tombol untuk semua antrean kecuali yang sudah selesai
+            let tombolPanggil = "-";
+
+            if (a.status === "Menunggu") {
+                tombolPanggil = `
+                    <button class="btn-warning btn-repeat"
+                        onclick="panggilUlang('${escapeHTML(a.nomor)}')">
+                        <i class="bi bi-volume-up-fill"></i>
+                        Panggil
+                    </button>
+                `;
+            } else if (
+                a.status === "Dipanggil" ||
+                a.status === "Dilewati"
+            ) {
+                tombolPanggil = `
+                    <button class="btn-warning btn-repeat"
+                        onclick="panggilUlang('${escapeHTML(a.nomor)}')">
+                        <i class="bi bi-volume-up-fill"></i>
+                        Panggil Ulang
+                    </button>
+                `;
+            }
 
             tabel.innerHTML += `
                 <tr>
@@ -336,36 +350,41 @@ function panggilBerikutnya() {
 
 
 /* =================================
-   PANGGIL ULANG
+   PANGGIL ULANG / PANGGIL LANGSUNG
    Bisa dari tabel dan dashboard
 ================================= */
 
 function panggilUlang(nomor = aktif ? aktif.nomor : null) {
 
     if (!nomor) {
-        alert("Pilih antrean yang ingin dipanggil ulang.");
+        alert("Pilih antrean yang ingin dipanggil.");
         return;
     }
 
     const data = antrean.find(a =>
         a.nomor === nomor &&
-        (a.status === "Dipanggil" || a.status === "Dilewati")
+        (
+            a.status === "Menunggu" ||
+            a.status === "Dipanggil" ||
+            a.status === "Dilewati"
+        )
     );
 
     if (!data) {
-        alert("Antrean tidak ditemukan atau tidak dapat dipanggil ulang.");
+        alert("Antrean tidak ditemukan atau sudah selesai.");
         return;
     }
 
-    // Ubah kembali status menjadi Dipanggil
-    data.status = "Dipanggil";
+    // Jika ada antrean aktif lain, kembalikan ke Menunggu
+    if (aktif && aktif.nomor !== data.nomor) {
+        aktif.status = "Menunggu";
+    }
 
-    // Jadikan antrean tersebut sebagai antrean aktif
+    // Jadikan antrean yang dipilih sebagai antrean aktif
+    data.status = "Dipanggil";
     aktif = data;
 
     simpanData();
-
-    // Memperbarui tabel dan layar pemanggilan utama
     tampilkanAntrean();
 
     // Panggil suara antrean
