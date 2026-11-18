@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -31,7 +30,7 @@
 
         <p class="subtitle">
             <i class="bi bi-eye-fill"></i>
-            Silakan ambil nomor antrean dan pantau pemanggilan Anda
+            Silakan ambil nomor antrian dan pantau pemanggilan Anda
         </p>
     </header>
 
@@ -45,7 +44,7 @@
             <div class="calling-header">
                 <h2>
                     <i class="bi bi-megaphone-fill"></i>
-                    Pemanggilan Nomor Antrean
+                    Pemanggilan Nomor Antrian
                     <i class="bi bi-volume-up-fill"></i>
                 </h2>
             </div>
@@ -59,7 +58,7 @@
 
                 <div class="calling-name">
                     <i class="bi bi-person-fill"></i>
-                    <h2 id="namaAktif">Belum ada antrean</h2>
+                    <h2 id="namaAktif">Belum ada antrian</h2>
                 </div>
 
                 <p id="layananAktif"></p>
@@ -211,33 +210,47 @@
 
 
         <!-- TABEL ANTREAN -->
-        <div class="table-section">
 
-            <h3>
-                <i class="bi bi-card-list"></i>
-                Daftar Antrean Menunggu
-            </h3>
+<div class="table-section">
 
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>Nomor Antrean</th>
-                            <th>Nama Pengunjung</th>
-                            <th>Jenis Layanan</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
+    <h3>
+        <i class="bi bi-card-list"></i>
+        Daftar Antrean
+    </h3>
 
-                    <tbody id="daftarAntrean">
-                    </tbody>
-                </table>
-            </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Nomor Antrean</th>
+                    <th>Nama Pengunjung</th>
+                    <th>Jenis Layanan</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
 
-        </div>
+            <tbody id="daftarAntrean"></tbody>
+        </table>
+    </div>
 
-    </section>
+    <!-- Navigasi halaman tabel -->
+    <div class="pagination">
+        <button id="btnSebelumnya" onclick="ubahHalaman(-1)">
+            <i class="bi bi-chevron-left"></i>
+            Sebelumnya
+        </button>
+
+        <span id="infoHalaman">Halaman 1</span>
+
+        <button id="btnBerikutnya" onclick="ubahHalaman(1)">
+            Berikutnya
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
+
+</div>
 
 
     <!-- FOOTER -->
